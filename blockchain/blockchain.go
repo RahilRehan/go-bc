@@ -1,20 +1,18 @@
 package blockchain
 
 type blockchain struct {
-	blocks []*block
+	Blocks []*block
 }
 
+// Add a new block to the blockchain
 func (bc *blockchain) AddBlock(data string) *block {
-	prevHash := bc.blocks[len(bc.blocks)-1].GetHash()
+	prevHash := bc.Blocks[len(bc.Blocks)-1].Hash
 	newBlock := MineBlock(prevHash, []byte(data))
-	bc.blocks = append(bc.blocks, newBlock)
+	bc.Blocks = append(bc.Blocks, newBlock)
 	return newBlock
 }
 
-func (bc *blockchain) GetBlocks() []*block {
-	return bc.blocks
-}
-
+// Return new blockchain with genesis block
 func NewBlockChain() *blockchain {
 	return &blockchain{[]*block{GenesisBlock([]byte("Genesis!"))}}
 }

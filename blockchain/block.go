@@ -12,39 +12,22 @@ import (
 // I don't like the idea of getters as everything in blockchain is public.
 // Doubt: if I make my struct fields exposed or expose a setter, anyone can change my fields (data can be tampered) - Integrity?
 // Solution: Just have a constructor via which block can be created. And have getters for each fields but no setters as we don't want to allow data tampering.
+// But for un-marshaling Json we need to have exported fields :(
 
 const HASH_SIZE = 32
 
 type block struct {
-	timestamp time.Time
-	prevHash  [HASH_SIZE]byte
-	hash      [HASH_SIZE]byte
-	data      []byte
+	Timestamp time.Time       `json:"timestamp"`
+	PrevHash  [HASH_SIZE]byte `json:"prevHash"`
+	Hash      [HASH_SIZE]byte `json:"hash"`
+	Data      []byte          `json:"data"`
 }
 
 // Stringer
 
 func (b *block) String() string {
 	return fmt.Sprintf("Timestamp: %s\nPrevHash: %x\nHash: %x\nData: %s\n",
-		b.timestamp.String(), string(b.prevHash[:]), string(b.hash[:]), string(b.data))
-}
-
-// Getters
-
-func (b *block) GetTimestamp() time.Time {
-	return b.timestamp
-}
-
-func (b *block) GetPrevHash() [HASH_SIZE]byte {
-	return b.prevHash
-}
-
-func (b *block) GetHash() [HASH_SIZE]byte {
-	return b.hash
-}
-
-func (b *block) GetData() []byte {
-	return b.data
+		b.Timestamp.String(), string(b.PrevHash[:]), string(b.Hash[:]), string(b.Data))
 }
 
 // Constructors
@@ -58,12 +41,12 @@ func GenesisBlock(data []byte) *block {
 func MineBlock(prevHash [HASH_SIZE]byte, data []byte) *block {
 
 	block := block{
-		timestamp: time.Now(),
-		prevHash:  prevHash,
-		data:      []byte(data),
+		Timestamp: time.Now(),
+		PrevHash:  prevHash,
+		Data:      []byte(data),
 	}
 
-	block.hash = sha256.Sum256([]byte(block.timestamp.String() + string(block.prevHash[:]) + string(block.data)))
+	block.Hash = sha256.Sum256([]byte(block.Timestamp.String() + string(block.PrevHash[:]) + string(block.Data)))
 
 	return &block
 }

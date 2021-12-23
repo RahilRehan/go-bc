@@ -16,10 +16,10 @@ func TestGenesisBlock(t *testing.T) {
 func TestMineBlock(t *testing.T) {
 
 	genisisBlock := blockchain.GenesisBlock([]byte("Genesis!"))
-	prevHash := genisisBlock.GetHash()
+	prevHash := genisisBlock.Hash
 	block := blockchain.MineBlock(prevHash, []byte("First Block!"))
 
 	require.NotNil(t, block)
-	require.Equal(t, block.GetPrevHash(), prevHash)
-	require.Equal(t, block.GetData(), []byte("First Block!"))
+	require.Equal(t, block.PrevHash, prevHash)
+	require.Equal(t, block.Data, []byte("First Block!"))
 }
