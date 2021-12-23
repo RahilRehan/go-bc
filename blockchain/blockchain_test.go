@@ -1,14 +1,14 @@
-package gobc_test
+package blockchain_test
 
 import (
 	"testing"
 
-	gobc "github.com/RahilRehan/go-bc"
+	"github.com/RahilRehan/go-bc/blockchain"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBlockChainCreation(t *testing.T) {
-	bc := gobc.NewBlockChain()
+	bc := blockchain.NewBlockChain()
 	bc.AddBlock("First Block!")
 	bc.AddBlock("Second Block!")
 

@@ -1,23 +1,23 @@
-package gobc_test
+package blockchain_test
 
 import (
 	"testing"
 
-	gobc "github.com/RahilRehan/go-bc"
+	"github.com/RahilRehan/go-bc/blockchain"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGenesisBlock(t *testing.T) {
-	block := gobc.GenesisBlock([]byte("Genesis!"))
+	block := blockchain.GenesisBlock([]byte("Genesis!"))
 
 	require.NotNil(t, block)
 }
 
 func TestMineBlock(t *testing.T) {
 
-	genisisBlock := gobc.GenesisBlock([]byte("Genesis!"))
+	genisisBlock := blockchain.GenesisBlock([]byte("Genesis!"))
 	prevHash := genisisBlock.GetHash()
-	block := gobc.MineBlock(prevHash, []byte("First Block!"))
+	block := blockchain.MineBlock(prevHash, []byte("First Block!"))
 
 	require.NotNil(t, block)
 	require.Equal(t, block.GetPrevHash(), prevHash)

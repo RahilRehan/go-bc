@@ -1,4 +1,4 @@
-package gobc
+package blockchain
 
 type blockchain struct {
 	blocks []*block

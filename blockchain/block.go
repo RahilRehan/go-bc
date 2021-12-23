@@ -1,4 +1,4 @@
-package gobc
+package blockchain
 
 import (
 	"crypto/sha256"
