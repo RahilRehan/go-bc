@@ -2,7 +2,6 @@ package blockchain
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"time"
 )
 
@@ -21,13 +20,6 @@ type block struct {
 	PrevHash  [HASH_SIZE]byte `json:"prevHash"`
 	Hash      [HASH_SIZE]byte `json:"hash"`
 	Data      []byte          `json:"data"`
-}
-
-// Stringer
-
-func (b *block) String() string {
-	return fmt.Sprintf("Timestamp: %s\nPrevHash: %x\nHash: %x\nData: %s\n",
-		b.Timestamp.String(), string(b.PrevHash[:]), string(b.Hash[:]), string(b.Data))
 }
 
 // Constructors
