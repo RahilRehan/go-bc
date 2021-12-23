@@ -16,7 +16,7 @@ import (
 
 const HASH_SIZE = 32
 
-type block struct {
+type Block struct {
 	Timestamp time.Time `json:"timestamp"`
 	PrevHash  string    `json:"prevHash"`
 	Hash      string    `json:"hash"`
@@ -26,15 +26,15 @@ type block struct {
 // Constructors
 
 // Create a Genesis Block initially
-func GenesisBlock(data []byte) *block {
+func GenesisBlock(data []byte) *Block {
 	dummyHash := NewSHA256([]byte("---------"))
 	return MineBlock(string(dummyHash[:]), data)
 }
 
 // Mine a new block based out of the previous block
-func MineBlock(prevHash string, data []byte) *block {
+func MineBlock(prevHash string, data []byte) *Block {
 
-	block := block{
+	block := Block{
 		Timestamp: time.Now(),
 		PrevHash:  string(prevHash[:]),
 		Data:      []byte(data),
