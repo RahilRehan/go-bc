@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"time"
 )
 
@@ -16,29 +17,36 @@ import (
 const HASH_SIZE = 32
 
 type block struct {
-	Timestamp time.Time       `json:"timestamp"`
-	PrevHash  [HASH_SIZE]byte `json:"prevHash"`
-	Hash      [HASH_SIZE]byte `json:"hash"`
-	Data      []byte          `json:"data"`
+	Timestamp time.Time `json:"timestamp"`
+	PrevHash  string    `json:"prevHash"`
+	Hash      string    `json:"hash"`
+	Data      []byte    `json:"data"`
 }
 
 // Constructors
 
 // Create a Genesis Block initially
 func GenesisBlock(data []byte) *block {
-	return MineBlock(sha256.Sum256([]byte("---------")), data)
+	dummyHash := NewSHA256([]byte("---------"))
+	return MineBlock(string(dummyHash[:]), data)
 }
 
 // Mine a new block based out of the previous block
-func MineBlock(prevHash [HASH_SIZE]byte, data []byte) *block {
+func MineBlock(prevHash string, data []byte) *block {
 
 	block := block{
 		Timestamp: time.Now(),
-		PrevHash:  prevHash,
+		PrevHash:  string(prevHash[:]),
 		Data:      []byte(data),
 	}
 
-	block.Hash = sha256.Sum256([]byte(block.Timestamp.String() + string(block.PrevHash[:]) + string(block.Data)))
+	hash := NewSHA256([]byte(block.Timestamp.String() + block.PrevHash + string(block.Data)))
+	block.Hash = string(hash[:])
 
 	return &block
+}
+
+func NewSHA256(data []byte) string {
+	hash := sha256.Sum256(data)
+	return hex.EncodeToString(hash[:])
 }
