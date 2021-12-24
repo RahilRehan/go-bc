@@ -1,8 +1,10 @@
 package blockchain
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"time"
 )
 
@@ -15,12 +17,14 @@ import (
 // But for un-marshaling Json we need to have exported fields :(
 
 const HASH_SIZE = 32
+const DIFFICULTY = 5
 
 type Block struct {
 	Timestamp time.Time `json:"timestamp"`
 	PrevHash  string    `json:"prevHash"`
 	Hash      string    `json:"hash"`
 	Data      []byte    `json:"data"`
+	Nonce     int       `json:"nonce"`
 }
 
 // Constructors
@@ -34,13 +38,25 @@ func GenesisBlock(data []byte) Block {
 // Mine a new block based out of the previous block
 func MineBlock(prevHash string, data []byte) Block {
 
-	block := Block{
-		Timestamp: time.Now(),
-		PrevHash:  string(prevHash[:]),
-		Data:      []byte(data),
+	var block Block
+	var hash string
+	nonce := 0
+
+	for {
+		block = Block{
+			Timestamp: time.Now(),
+			PrevHash:  string(prevHash[:]),
+			Data:      []byte(data),
+			Nonce:     nonce,
+		}
+
+		hash = NewSHA256([]byte(block.Timestamp.String() + block.PrevHash + string(block.Data) + fmt.Sprint(nonce)))
+		if hash[:DIFFICULTY] == string(bytes.Repeat([]byte("0"), DIFFICULTY)) {
+			break
+		}
+		nonce++
 	}
 
-	hash := NewSHA256([]byte(block.Timestamp.String() + block.PrevHash + string(block.Data)))
 	block.Hash = string(hash[:])
 
 	return block

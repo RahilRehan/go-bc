@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"time"
 
 	"github.com/RahilRehan/go-bc/blockchain"
 	"github.com/google/uuid"
@@ -47,7 +46,6 @@ func (p *peer) connectToServer() {
 		if err != nil {
 			log.Fatalln("couldn't send message: ", err.Error())
 		}
-		time.Sleep(5 * time.Second)
 
 		p.blockchain = p.blockchain.AddBlock("new data")
 	}
@@ -79,6 +77,7 @@ func (p *peer) handleNewMessage(conn *websocket.Conn) {
 			log.Fatalf("error while unmarshaling: %s\n", err.Error())
 		}
 
+		// sync blockchain according to received blockchains length, longest blockchain wins
 		if len(receivedBlockchain.Blocks) > len(p.blockchain.Blocks) {
 			p.blockchain = receivedBlockchain
 			log.Println("=========> Blockchain updated!!!")
