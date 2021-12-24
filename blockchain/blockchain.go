@@ -14,5 +14,9 @@ func (bc Blockchain) AddBlock(data string) Blockchain {
 
 // Return new blockchain with genesis block
 func NewBlockChain() Blockchain {
-	return Blockchain{[]Block{GenesisBlock([]byte("Genesis!"))}}
+	return Blockchain{
+		[]Block{
+			GenesisBlock([]byte("Genesis!")),
+		},
+	}
 }
