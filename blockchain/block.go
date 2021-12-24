@@ -26,13 +26,13 @@ type Block struct {
 // Constructors
 
 // Create a Genesis Block initially
-func GenesisBlock(data []byte) *Block {
+func GenesisBlock(data []byte) Block {
 	dummyHash := NewSHA256([]byte("---------"))
 	return MineBlock(string(dummyHash[:]), data)
 }
 
 // Mine a new block based out of the previous block
-func MineBlock(prevHash string, data []byte) *Block {
+func MineBlock(prevHash string, data []byte) Block {
 
 	block := Block{
 		Timestamp: time.Now(),
@@ -43,7 +43,7 @@ func MineBlock(prevHash string, data []byte) *Block {
 	hash := NewSHA256([]byte(block.Timestamp.String() + block.PrevHash + string(block.Data)))
 	block.Hash = string(hash[:])
 
-	return &block
+	return block
 }
 
 func NewSHA256(data []byte) string {

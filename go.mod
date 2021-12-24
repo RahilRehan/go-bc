@@ -5,8 +5,9 @@ go 1.17
 require (
 	github.com/libp2p/go-libp2p v0.17.0
 	github.com/libp2p/go-libp2p-core v0.13.0
-	github.com/libp2p/go-libp2p-net v0.1.0
-	github.com/multiformats/go-multiaddr v0.4.0
+	github.com/libp2p/go-libp2p-crypto v0.1.0
+	github.com/libp2p/go-libp2p-host v0.1.0
+	github.com/multiformats/go-multiaddr v0.4.1
 	github.com/stretchr/testify v1.7.0
 )
 
