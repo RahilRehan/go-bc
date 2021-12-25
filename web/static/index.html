@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>GOBC</title>
+  </head>
+  <body>
+    <h2>GOBC: A simple blockchain currency written in GO</h2>
+
+    <form action="/wallet" method="POST">
+      New to GOBC?
+      <input type="submit" value="Create"> a new Wallet.
+    </form>
+
+    <form action="/wallet" method="GET">
+      Already have a Wallet?
+      Enter your wallet address
+      <input type="text" name="address" placeholder="wallet address"> 
+      <input type="submit" value="Login">
+    </form>
+
+  </body>
+</html>

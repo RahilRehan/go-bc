@@ -1,21 +1,25 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"html"
+	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	gobc "github.com/RahilRehan/go-bc"
 )
 
-type walletHandler struct {
+type gobcHandler struct {
 	wallets []gobc.Wallet
+	txPool  gobc.TransactionPool
 }
 
-func (t *walletHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (t *gobcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		t.handleGet(w, r)
@@ -27,25 +31,44 @@ func (t *walletHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t *walletHandler) handleGet(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("GET")
+func (t *gobcHandler) handleGet(w http.ResponseWriter, r *http.Request) {
+	if strings.HasPrefix(r.URL.Path, "/gobc/transactions") {
+		fmt.Fprintln(w, "YO! transactions!")
+		for _, tx := range t.txPool.Transactions {
+			fmt.Fprintln(w, tx)
+		}
+		return
+	}
 }
 
-func (t *walletHandler) handlePost(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("POST")
+func (t *gobcHandler) handlePost(w http.ResponseWriter, r *http.Request) {
+	sender := gobc.NewWallet()
+	receiver := gobc.NewWallet()
+	t.wallets = append(t.wallets, sender)
+	t.wallets = append(t.wallets, receiver)
+
+	var amount int64
+	if strings.HasPrefix(r.URL.Path, "/gobc/transactions") {
+		bs, _ := io.ReadAll(r.Body)
+		json.Unmarshal(bs, &amount)
+		tx := gobc.NewTransaction(&sender, &receiver, amount)
+		t.txPool.Add(tx)
+		http.Redirect(w, r, "/gobc/transactions", http.StatusSeeOther)
+	}
 }
 
 func NewWebServer(port string) {
 
-	wh := newWalletHandler()
-	mh := newMiddlewareHandler(wh)
+	gh := newGobcHandler()
+	mh := newMiddlewareHandler(gh)
 	mh.Use(newReqResLogger(log.New(os.Stdout, "", log.LstdFlags)))
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 	})
-	mux.Handle("/wallet", mh)
+	mux.Handle("/gobc/", mh)
+	mux.Handle("/", http.FileServer(http.Dir("./web/static")))
 
 	server := &http.Server{
 		Addr:           port,
@@ -62,8 +85,8 @@ func NewWebServer(port string) {
 
 }
 
-func newWalletHandler() http.Handler {
-	return &walletHandler{
+func newGobcHandler() http.Handler {
+	return &gobcHandler{
 		wallets: make([]gobc.Wallet, 0),
 	}
 }

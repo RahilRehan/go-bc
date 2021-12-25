@@ -16,5 +16,4 @@ func newReqResLogger(lgr *log.Logger) http.Handler {
 
 func (lm *reqResLogger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	lm.lgr.Printf("%s %s", r.Method, r.URL.Path)
-	lm.lgr.Printf("%s", r.Header)
 }
