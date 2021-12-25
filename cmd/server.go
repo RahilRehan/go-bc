@@ -29,10 +29,6 @@ func newServer(port string) *server {
 
 func (s *server) start() {
 
-	fmt.Println("=====================================")
-	log.Println("Server started on port " + s.port)
-	fmt.Println("=====================================")
-
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := wsUpgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -44,7 +40,10 @@ func (s *server) start() {
 		go s.handleWsConn(c)
 	})
 
-	http.ListenAndServe(s.port, nil)
+	fmt.Println("=====================================")
+	log.Println("P2P Server started on port " + s.port)
+	fmt.Println("=====================================")
+	log.Fatalln(http.ListenAndServe(s.port, nil))
 }
 
 func (s *server) handleWsConn(c *client) {
