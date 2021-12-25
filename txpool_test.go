@@ -1,26 +1,27 @@
 package gobc_test
 
 import (
-	"fmt"
 	"testing"
 
 	gobc "github.com/RahilRehan/go-bc"
 	"github.com/stretchr/testify/require"
 )
 
-func TestWalletCreation(t *testing.T) {
-	w := gobc.NewWallet()
-	fmt.Println(w)
+func TestTransactionPoolCreation(t *testing.T) {
+	txp := gobc.NewTransactionPool()
+	require.NotNil(t, txp)
 }
 
-func TestTransactionCreationOnWalletAndAddTransactionToTransactionPool(t *testing.T) {
+func TestTransactionPoolAddNewTransaction(t *testing.T) {
 	sender := gobc.NewWallet()
 	recipient := gobc.NewWallet()
 	amount := int64(70)
 
 	txp := gobc.NewTransactionPool()
 	prevTxpLen := len(txp.Transactions)
-	tx := sender.CreateTransaction(&recipient, amount, txp)
+	tx := gobc.NewTransaction(&sender, &recipient, amount)
 	tx.Sign(&sender, &tx.Output)
-	require.Equal(t, prevTxpLen+1, len(txp.Transactions))
+	txp.Add(tx)
+
+	require.Equal(t, len(txp.Transactions), prevTxpLen+1)
 }

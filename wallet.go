@@ -37,3 +37,9 @@ func NewWallet() Wallet {
 func (w Wallet) String() string {
 	return fmt.Sprintf("Wallet: \n Balance: %d\n PublicKey: %v\n", w.Balance, w.PublicKey)
 }
+
+func (w *Wallet) CreateTransaction(recipient *Wallet, amount int64, txp *TransactionPool) *Transaction {
+	tx := NewTransaction(w, recipient, amount)
+	txp.Add(tx)
+	return tx
+}
