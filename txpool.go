@@ -7,18 +7,18 @@ import (
 const TP_SIZE = 10
 
 type TransactionPool struct {
-	Transactions []*Transaction
+	Transactions []Transaction `json:"transactions"`
 }
 
 func (txp *TransactionPool) Add(tx *Transaction) {
 	if len(txp.Transactions) >= TP_SIZE {
 		log.Fatalln("Transaction pool is full")
 	}
-	txp.Transactions = append(txp.Transactions, tx)
+	txp.Transactions = append(txp.Transactions, *tx)
 }
 
 func NewTransactionPool() *TransactionPool {
 	return &TransactionPool{
-		Transactions: make([]*Transaction, 1),
+		Transactions: make([]Transaction, 0),
 	}
 }

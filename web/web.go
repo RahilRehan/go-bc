@@ -36,7 +36,18 @@ func (gh *gobcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (gh *gobcHandler) handleGet(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello, GET \n Listing all the transactions")
+	res, err := http.Get("http://localhost:8080/transaction")
+	if err != nil {
+		log.Fatalln("can't get transactions from server", err)
+	}
+	var txPool gobc.TransactionPool
+	bs, _ := io.ReadAll(res.Body)
+	json.Unmarshal(bs, &txPool)
+	if err != nil {
+		log.Fatalln("can't decode transactions from server", err)
+	}
+	// txPool := gobc.TransactionPool{Transactions: txs}
+	fmt.Fprintf(w, "Transactions: %v", txPool)
 }
 
 func (gh *gobcHandler) handlePost(w http.ResponseWriter, r *http.Request) {
@@ -45,8 +56,8 @@ func (gh *gobcHandler) handlePost(w http.ResponseWriter, r *http.Request) {
 	gh.wallets = append(gh.wallets, sender)
 	gh.wallets = append(gh.wallets, receiver)
 
-	var txReq txRequest
 	if strings.HasPrefix(r.URL.Path, "/gobc/transactions") {
+		var txReq txRequest
 		bs, _ := io.ReadAll(r.Body)
 		json.Unmarshal(bs, &txReq)
 		tx := gobc.NewTransaction(&sender, &receiver, txReq.Amount)

@@ -14,7 +14,7 @@ import (
 type server struct {
 	port    string
 	clients []*client
-	txPool  gobc.TransactionPool
+	txPool  *gobc.TransactionPool
 }
 
 var wsUpgrader = websocket.Upgrader{
@@ -26,7 +26,7 @@ var wsUpgrader = websocket.Upgrader{
 func newServer(port string) *server {
 	return &server{
 		port:   port,
-		txPool: *gobc.NewTransactionPool(),
+		txPool: gobc.NewTransactionPool(),
 	}
 }
 
@@ -56,6 +56,7 @@ func (s *server) start() {
 	log.Println("P2P Server started on port " + s.port)
 	fmt.Println("=====================================")
 	log.Fatalln(http.ListenAndServe(s.port, nil))
+
 }
 
 func (s *server) handleWsConn(c *client) {
@@ -83,17 +84,15 @@ func (s *server) handleWsConn(c *client) {
 func handlePost(s *server, rw http.ResponseWriter, r *http.Request) {
 	var tx gobc.Transaction
 	bs, _ := io.ReadAll(r.Body)
-	err := json.Unmarshal(bs, &tx)
-	fmt.Println(tx)
-	if err != nil {
-		http.Error(rw, "couldn't decode transaction", http.StatusBadRequest)
-		return
-	}
+	json.Unmarshal(bs, &tx)
 	s.txPool.Add(&tx)
 }
 
 func handleGet(s *server, rw http.ResponseWriter, r *http.Request) {
-	bs, _ := json.Marshal(s.txPool.Transactions)
+	bs, err := json.Marshal(s.txPool)
+	if err != nil {
+		log.Fatalln("Error marshalling transactions: ", err)
+	}
 	rw.Write(bs)
 }
 
