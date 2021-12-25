@@ -1,6 +1,7 @@
 package web
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html"
@@ -16,43 +17,49 @@ import (
 
 type gobcHandler struct {
 	wallets []gobc.Wallet
-	txPool  gobc.TransactionPool
 }
 
-func (t *gobcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+type txRequest struct {
+	Amount int64 `json:"amount"`
+}
+
+func (gh *gobcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		t.handleGet(w, r)
+		gh.handleGet(w, r)
 	case "POST":
-		t.handlePost(w, r)
+		gh.handlePost(w, r)
 	default:
 		w.Header().Set("Allow", "GET, POST, OPTIONS")
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
 
-func (t *gobcHandler) handleGet(w http.ResponseWriter, r *http.Request) {
-	if strings.HasPrefix(r.URL.Path, "/gobc/transactions") {
-		fmt.Fprintln(w, "YO! transactions!")
-		for _, tx := range t.txPool.Transactions {
-			fmt.Fprintln(w, tx)
-		}
-		return
-	}
+func (gh *gobcHandler) handleGet(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Hello, GET \n Listing all the transactions")
 }
 
-func (t *gobcHandler) handlePost(w http.ResponseWriter, r *http.Request) {
+func (gh *gobcHandler) handlePost(w http.ResponseWriter, r *http.Request) {
 	sender := gobc.NewWallet()
 	receiver := gobc.NewWallet()
-	t.wallets = append(t.wallets, sender)
-	t.wallets = append(t.wallets, receiver)
+	gh.wallets = append(gh.wallets, sender)
+	gh.wallets = append(gh.wallets, receiver)
 
-	var amount int64
+	var txReq txRequest
 	if strings.HasPrefix(r.URL.Path, "/gobc/transactions") {
 		bs, _ := io.ReadAll(r.Body)
-		json.Unmarshal(bs, &amount)
-		tx := gobc.NewTransaction(&sender, &receiver, amount)
-		t.txPool.Add(tx)
+		json.Unmarshal(bs, &txReq)
+		tx := gobc.NewTransaction(&sender, &receiver, txReq.Amount)
+		bs, err := json.Marshal(tx)
+		if err != nil {
+			log.Fatalln("cannot marshal transaction")
+		}
+
+		_, err = http.Post("http://localhost:8080/transaction", "application/json", bytes.NewBuffer(bs))
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		http.Redirect(w, r, "/gobc/transactions", http.StatusSeeOther)
 	}
 }

@@ -14,9 +14,9 @@ import (
 )
 
 type Transaction struct {
-	Id     uuid.UUID
-	Input  InputDetail     // contains => details about sender, senders [original balance, signature and public key]
-	Output [2]OutputDetail // contains => [OutputDetail of senders balance after transaction + senders public key] and [OutputDetail of amount amount received by receiver + recipients public key]
+	Id     uuid.UUID       `json:"id"`
+	Input  InputDetail     `json:"input"`  // contains => details about sender, senders [original balance, signature and public key]
+	Output [2]OutputDetail `json:"output"` // contains => [OutputDetail of senders balance after transaction + senders public key] and [OutputDetail of amount amount received by receiver + recipients public key]
 }
 
 type OutputDetail struct {

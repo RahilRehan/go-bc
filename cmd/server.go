@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 
@@ -13,6 +14,7 @@ import (
 type server struct {
 	port    string
 	clients []*client
+	txPool  gobc.TransactionPool
 }
 
 var wsUpgrader = websocket.Upgrader{
@@ -23,7 +25,8 @@ var wsUpgrader = websocket.Upgrader{
 
 func newServer(port string) *server {
 	return &server{
-		port: port,
+		port:   port,
+		txPool: *gobc.NewTransactionPool(),
 	}
 }
 
@@ -38,6 +41,15 @@ func (s *server) start() {
 		c := newClient(conn)
 		s.clients = append(s.clients, c)
 		go s.handleWsConn(c)
+	})
+
+	http.HandleFunc("/transaction", func(rw http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			handleGet(s, rw, r)
+		case "POST":
+			handlePost(s, rw, r)
+		}
 	})
 
 	fmt.Println("=====================================")
@@ -61,11 +73,28 @@ func (s *server) handleWsConn(c *client) {
 		var bc gobc.Blockchain
 		err = json.Unmarshal(msg, &bc)
 		if err != nil {
-			log.Fatalln("Error unmarshalling blockchain: ", err)
+			log.Fatalln("Error un marshalling blockchain: ", err)
 		}
 		fmt.Println(bc)
 		s.broadcastMessage(serverLog, c.id)
 	}
+}
+
+func handlePost(s *server, rw http.ResponseWriter, r *http.Request) {
+	var tx gobc.Transaction
+	bs, _ := io.ReadAll(r.Body)
+	err := json.Unmarshal(bs, &tx)
+	fmt.Println(tx)
+	if err != nil {
+		http.Error(rw, "couldn't decode transaction", http.StatusBadRequest)
+		return
+	}
+	s.txPool.Add(&tx)
+}
+
+func handleGet(s *server, rw http.ResponseWriter, r *http.Request) {
+	bs, _ := json.Marshal(s.txPool.Transactions)
+	rw.Write(bs)
 }
 
 func (s *server) broadcastMessage(msg, id string) {
