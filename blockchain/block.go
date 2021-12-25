@@ -29,6 +29,17 @@ type Block struct {
 	Nonce     int64     `json:"nonce"`
 }
 
+func (b Block) String() string {
+	return fmt.Sprintf(`
+		Timestamp: %v
+		PrevHash: %s
+		Hash: %s
+		Data: %s
+		Nonce: %d
+		
+	`, b.Timestamp, b.PrevHash, b.Hash, b.Data, b.Nonce)
+}
+
 // Create a Genesis Block initially
 func GenesisBlock(data []byte) Block {
 	dummyHash := NewSHA256([]byte("---------"))
