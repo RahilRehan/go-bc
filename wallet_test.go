@@ -1,13 +1,13 @@
-package wallet_test
+package gobc_test
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/RahilRehan/go-bc/wallet"
+	gobc "github.com/RahilRehan/go-bc"
 )
 
 func TestWalletCreation(t *testing.T) {
-	w := wallet.NewWallet()
+	w := gobc.NewWallet()
 	fmt.Println(w)
 }

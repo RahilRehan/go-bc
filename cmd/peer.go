@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/RahilRehan/go-bc/blockchain"
+	gobc "github.com/RahilRehan/go-bc"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -14,13 +14,13 @@ import (
 // each peer has a blockchain attached to it, it connects to server and handles broadcasts
 type peer struct {
 	host       string
-	blockchain blockchain.Blockchain
+	blockchain gobc.Blockchain
 }
 
 func newPeer(port string) *peer {
 	return &peer{
 		host:       "localhost" + port,
-		blockchain: blockchain.NewBlockChain(),
+		blockchain: gobc.NewBlockChain(),
 	}
 }
 
@@ -71,7 +71,7 @@ func (p *peer) handleNewMessage(conn *websocket.Conn) {
 		if err != nil {
 			log.Fatalf("error while reading: %s\n", err.Error())
 		}
-		var receivedBlockchain blockchain.Blockchain
+		var receivedBlockchain gobc.Blockchain
 		err = json.Unmarshal(msg, &receivedBlockchain)
 		if err != nil {
 			log.Fatalf("error while unmarshaling: %s\n", err.Error())

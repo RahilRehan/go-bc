@@ -1,4 +1,4 @@
-package wallet
+package gobc
 
 import (
 	"crypto/ecdsa"
@@ -11,12 +11,12 @@ import (
 const INITIAL_BALANCE = 500
 
 type Wallet struct {
-	balance   int64
+	Balance   int64
 	keyPair   *ecdsa.PrivateKey
-	publicKey ecdsa.PublicKey
+	PublicKey ecdsa.PublicKey
 }
 
-func NewWallet() *Wallet {
+func NewWallet() Wallet {
 
 	curve := elliptic.P256()
 
@@ -27,13 +27,13 @@ func NewWallet() *Wallet {
 	pubkey := keyPair.PublicKey
 
 	wallet := Wallet{
-		balance:   INITIAL_BALANCE,
+		Balance:   INITIAL_BALANCE,
 		keyPair:   keyPair,
-		publicKey: pubkey,
+		PublicKey: pubkey,
 	}
-	return &wallet
+	return wallet
 }
 
 func (w Wallet) String() string {
-	return fmt.Sprintf("Wallet: \n Balance: %d\n PublicKey: %v\n", w.balance, w.publicKey)
+	return fmt.Sprintf("Wallet: \n Balance: %d\n PublicKey: %v\n", w.Balance, w.PublicKey)
 }

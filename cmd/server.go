@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/RahilRehan/go-bc/blockchain"
+	gobc "github.com/RahilRehan/go-bc"
 	"github.com/gorilla/websocket"
 )
 
@@ -59,7 +59,7 @@ func (s *server) handleWsConn(c *client) {
 		}
 		serverLog := fmt.Sprint(string(msg))
 
-		var bc blockchain.Blockchain
+		var bc gobc.Blockchain
 		err = json.Unmarshal(msg, &bc)
 		if err != nil {
 			log.Fatalln("Error unmarshalling blockchain: ", err)

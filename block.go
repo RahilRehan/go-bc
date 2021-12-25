@@ -1,9 +1,7 @@
-package blockchain
+package gobc
 
 import (
 	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"time"
 )
@@ -82,9 +80,4 @@ func MineBlock(prevHash string, data []byte, nonce int64, prevBlockCreatedTime t
 	block.Hash = string(hash[:])
 
 	return block
-}
-
-func NewSHA256(data []byte) string {
-	hash := sha256.Sum256(data)
-	return hex.EncodeToString(hash[:])
 }
