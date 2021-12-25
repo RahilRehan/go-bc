@@ -40,7 +40,7 @@ func (o OutputDetail) String() string {
 	return fmt.Sprintf("OutputDetail: \n Amount: %d\n Address: %v\n", o.Amount, o.Address)
 }
 
-func NewTransaction(sender *Wallet, recipientAddr ecdsa.PublicKey, amount int64) *Transaction {
+func NewTransaction(sender *Wallet, recipient *Wallet, amount int64) *Transaction {
 	if amount < 0 {
 		log.Println("Amount cannot be negative")
 		return nil
@@ -57,7 +57,7 @@ func NewTransaction(sender *Wallet, recipientAddr ecdsa.PublicKey, amount int64)
 		},
 		{
 			Amount:  amount,
-			Address: recipientAddr,
+			Address: recipient.PublicKey,
 		},
 	}
 

@@ -16,7 +16,7 @@ func TestNegativeAmountTransaction(t *testing.T) {
 	sender := gobc.NewWallet()
 	recipient := gobc.NewWallet()
 	amount := int64(-20)
-	tx := gobc.NewTransaction(&sender, recipient.PublicKey, amount)
+	tx := gobc.NewTransaction(&sender, &recipient, amount)
 
 	require.Nil(t, tx)
 }
@@ -25,7 +25,7 @@ func TestInSufficientBalanceTransaction(t *testing.T) {
 	sender := gobc.NewWallet()
 	recipient := gobc.NewWallet()
 	amount := int64(sender.Balance + 1)
-	tx := gobc.NewTransaction(&sender, recipient.PublicKey, amount)
+	tx := gobc.NewTransaction(&sender, &recipient, amount)
 
 	require.Nil(t, tx)
 }
@@ -34,7 +34,7 @@ func TestTransactionBetweenTwoWallets(t *testing.T) {
 	sender := gobc.NewWallet()
 	recipient := gobc.NewWallet()
 	amount := int64(20)
-	tx := gobc.NewTransaction(&sender, recipient.PublicKey, amount)
+	tx := gobc.NewTransaction(&sender, &recipient, amount)
 	tx.Sign(&sender, &tx.Output)
 
 	require.NotNil(t, tx)
