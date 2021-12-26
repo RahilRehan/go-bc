@@ -6,15 +6,22 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	gobc "github.com/RahilRehan/go-bc"
 	"github.com/gorilla/websocket"
 )
 
 type server struct {
-	port    string
-	clients []*client
-	txPool  *gobc.TransactionPool
+	port       string
+	clients    []*client
+	txPool     *gobc.TransactionPool
+	wallets    []gobc.Wallet
+	blockchain gobc.Blockchain
+}
+
+type txRequest struct {
+	Amount int64 `json:"amount"`
 }
 
 var wsUpgrader = websocket.Upgrader{
@@ -43,12 +50,14 @@ func (s *server) start() {
 		go s.handleWsConn(c)
 	})
 
-	http.HandleFunc("/transaction", func(rw http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case "GET":
-			handleGet(s, rw, r)
-		case "POST":
-			handlePost(s, rw, r)
+	http.HandleFunc("/gobc/", func(rw http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/gobc/transactions") {
+			switch r.Method {
+			case "GET":
+				s.handleGet(rw, r)
+			case "POST":
+				s.handlePost(rw, r)
+			}
 		}
 	})
 
@@ -76,24 +85,37 @@ func (s *server) handleWsConn(c *client) {
 		if err != nil {
 			log.Fatalln("Error un marshalling blockchain: ", err)
 		}
-		fmt.Println(bc)
+		s.blockchain = bc
 		s.broadcastMessage(serverLog, c.id)
 	}
 }
 
-func handlePost(s *server, rw http.ResponseWriter, r *http.Request) {
-	var tx gobc.Transaction
+func (s *server) handlePost(rw http.ResponseWriter, r *http.Request) {
+	sender := gobc.NewWallet()
+	receiver := gobc.NewWallet()
+	s.wallets = append(s.wallets, sender)
+	s.wallets = append(s.wallets, receiver)
+
+	var txReq txRequest
 	bs, _ := io.ReadAll(r.Body)
-	json.Unmarshal(bs, &tx)
-	s.txPool.Add(&tx)
+	json.Unmarshal(bs, &txReq)
+	tx := gobc.NewTransaction(&sender, &receiver, txReq.Amount)
+	s.txPool.Add(tx)
+
+	fmt.Println("TX POOL: ", s.txPool)
+
+	rw.WriteHeader(http.StatusCreated)
+	rw.Write([]byte("Transaction added to unverified transactions pool! Will be confirmed in next available block."))
+
 }
 
-func handleGet(s *server, rw http.ResponseWriter, r *http.Request) {
-	bs, err := json.Marshal(s.txPool)
-	if err != nil {
-		log.Fatalln("Error marshalling transactions: ", err)
-	}
-	rw.Write(bs)
+func (s *server) handleGet(rw http.ResponseWriter, r *http.Request) {
+	// for _, block := range s.blockchain.Blocks {
+	// 	for _, tx := range block.Transactions {
+	// 		fmt.Println(tx)
+	// 	}
+	// }
+	rw.Write([]byte("These are all the validated transactions!"))
 }
 
 func (s *server) broadcastMessage(msg, id string) {
