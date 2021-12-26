@@ -9,18 +9,17 @@ import (
 )
 
 func TestGenesisBlock(t *testing.T) {
-	block := gobc.GenesisBlock([]byte("Genesis!"))
+	block := gobc.GenesisBlock()
 
 	require.NotNil(t, block)
 }
 
 func TestMineBlock(t *testing.T) {
 
-	genisisBlock := gobc.GenesisBlock([]byte("Genesis!"))
+	genisisBlock := gobc.GenesisBlock()
 	prevHash := genisisBlock.Hash
-	block := gobc.MineBlock(prevHash, []byte("First Block!"), 0, time.Now())
+	block := gobc.MineBlock(prevHash, 0, time.Now())
 
 	require.NotNil(t, block)
 	require.Equal(t, block.PrevHash, prevHash)
-	require.Equal(t, block.Data, []byte("First Block!"))
 }

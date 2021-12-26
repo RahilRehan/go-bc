@@ -20,11 +20,11 @@ const MINE_RATE = (time.Second)
 var DIFFICULTY = 4
 
 type Block struct {
-	Timestamp time.Time `json:"timestamp"`
-	PrevHash  string    `json:"prevHash"`
-	Hash      string    `json:"hash"`
-	Data      []byte    `json:"data"`
-	Nonce     int64     `json:"nonce"`
+	Timestamp    time.Time     `json:"timestamp"`
+	PrevHash     string        `json:"prevHash"`
+	Hash         string        `json:"hash"`
+	Transactions []Transaction `json:"transactions"`
+	Nonce        int64         `json:"nonce"`
 }
 
 func (b Block) String() string {
@@ -32,20 +32,20 @@ func (b Block) String() string {
 		Timestamp: %v
 		PrevHash: %s
 		Hash: %s
-		Data: %s
+		Transactions: %v
 		Nonce: %d
 		
-	`, b.Timestamp, b.PrevHash, b.Hash, b.Data, b.Nonce)
+	`, b.Timestamp, b.PrevHash, b.Hash, b.Transactions, b.Nonce)
 }
 
 // Create a Genesis Block initially
-func GenesisBlock(data []byte) Block {
+func GenesisBlock() Block {
 	dummyHash := NewSHA256([]byte("---------"))
-	return MineBlock(string(dummyHash[:]), data, 0, time.Now())
+	return MineBlock(string(dummyHash[:]), 0, time.Now())
 }
 
 // Mine a new block based out of the previous block
-func MineBlock(prevHash string, data []byte, nonce int64, prevBlockCreatedTime time.Time) Block {
+func MineBlock(prevHash string, nonce int64, prevBlockCreatedTime time.Time) Block {
 
 	var block Block
 	var hash string
@@ -54,11 +54,10 @@ func MineBlock(prevHash string, data []byte, nonce int64, prevBlockCreatedTime t
 		block = Block{
 			Timestamp: time.Now(),
 			PrevHash:  string(prevHash[:]),
-			Data:      []byte(data),
 			Nonce:     nonce,
 		}
 
-		hash = NewSHA256([]byte(block.Timestamp.String() + block.PrevHash + string(block.Data) + fmt.Sprint(nonce)))
+		hash = NewSHA256([]byte(block.Timestamp.String() + block.PrevHash + fmt.Sprint(nonce)))
 		if hash[:DIFFICULTY] == string(bytes.Repeat([]byte("0"), DIFFICULTY)) {
 			if time.Since(prevBlockCreatedTime) < MINE_RATE {
 				DIFFICULTY += 1

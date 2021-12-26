@@ -10,7 +10,7 @@ type Blockchain struct {
 func (bc Blockchain) AddBlock(data string) Blockchain {
 	prevBlock := bc.Blocks[len(bc.Blocks)-1]
 	prevHash := prevBlock.Hash
-	newBlock := MineBlock(prevHash, []byte(data), 0, prevBlock.Timestamp)
+	newBlock := MineBlock(prevHash, 0, prevBlock.Timestamp)
 	bc.Blocks = append(bc.Blocks, newBlock)
 	return bc
 }
@@ -29,7 +29,7 @@ func (bc Blockchain) String() string {
 func NewBlockChain() Blockchain {
 	return Blockchain{
 		[]Block{
-			GenesisBlock([]byte("Genesis!")),
+			GenesisBlock(),
 		},
 	}
 }

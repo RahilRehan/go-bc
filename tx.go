@@ -23,13 +23,13 @@ type Transaction struct {
 
 type OutputDetail struct {
 	Amount  int64
-	Address ecdsa.PublicKey
+	Address string
 }
 
 type InputDetail struct {
 	Timestamp time.Time
 	Amount    int64
-	Address   ecdsa.PublicKey
+	Address   string
 	Signature SignatureDetail
 }
 
@@ -95,6 +95,6 @@ func (tx *Transaction) Sign(senderWallet *Wallet, outputDetail *[2]OutputDetail)
 
 // verify the transaction with the public key of the sender
 func (tx *Transaction) Verify(senderWallet *Wallet, sd SignatureDetail) bool {
-	verifystatus := ecdsa.Verify(&senderWallet.PublicKey, sd.SignHash, sd.R, sd.S)
+	verifystatus := ecdsa.Verify(&senderWallet.PublicKeyECDSA, sd.SignHash, sd.R, sd.S)
 	return verifystatus
 }
