@@ -14,9 +14,11 @@ import (
 )
 
 type Transaction struct {
-	Id     uuid.UUID       `json:"id"`
-	Input  InputDetail     `json:"input"`  // contains => details about sender, senders [original balance, signature and public key]
-	Output [2]OutputDetail `json:"output"` // contains => [OutputDetail of senders balance after transaction + senders public key] and [OutputDetail of amount amount received by receiver + recipients public key]
+	Id       uuid.UUID       `json:"id"`
+	Input    InputDetail     `json:"input"`  // contains => details about sender, senders [original balance, signature and public key]
+	Output   [2]OutputDetail `json:"output"` // contains => [OutputDetail of senders balance after transaction + senders public key] and [OutputDetail of amount amount received by receiver + recipients public key]
+	Verified bool            `json:"verified"`
+	Complete bool            `json:"complete"`
 }
 
 type OutputDetail struct {
@@ -68,9 +70,11 @@ func NewTransaction(sender *Wallet, recipient *Wallet, amount int64) *Transactio
 	}
 
 	return &Transaction{
-		Id:     uuid.New(),
-		Input:  input,
-		Output: output,
+		Id:       uuid.New(),
+		Input:    input,
+		Output:   output,
+		Verified: false,
+		Complete: false,
 	}
 }
 

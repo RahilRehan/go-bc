@@ -11,9 +11,9 @@ import (
 const INITIAL_BALANCE = 500
 
 type Wallet struct {
-	Balance   int64
+	Balance   int64 `json:"balance"`
 	keyPair   *ecdsa.PrivateKey
-	PublicKey ecdsa.PublicKey
+	PublicKey ecdsa.PublicKey `json:"public_key"`
 }
 
 func NewWallet() Wallet {
@@ -36,6 +36,14 @@ func NewWallet() Wallet {
 
 func (w Wallet) String() string {
 	return fmt.Sprintf("Wallet: \n Balance: %d\n PublicKey: %v\n", w.Balance, w.PublicKey)
+}
+
+func (w Wallet) ID() string {
+	return fmt.Sprintf("%x", w.keyPair.D.Bytes())
+}
+
+func (w Wallet) GetPublicKey() string {
+	return fmt.Sprintf("%x", elliptic.Marshal(w.PublicKey, w.PublicKey.X, w.PublicKey.Y))
 }
 
 func (w *Wallet) CreateTransaction(recipient *Wallet, amount int64, txp *TransactionPool) *Transaction {

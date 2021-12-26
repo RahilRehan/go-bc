@@ -21,7 +21,9 @@ type server struct {
 }
 
 type txRequest struct {
-	Amount int64 `json:"amount"`
+	Amount      int64  `json:"amount"`
+	FromPrivKey string `json:"fromPrivKey"`
+	ToPublicKey string `json:"toPbKey"`
 }
 
 var wsUpgrader = websocket.Upgrader{
@@ -50,13 +52,24 @@ func (s *server) start() {
 		go s.handleWsConn(c)
 	})
 
+	http.HandleFunc("/wallet", func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/wallet") {
+			switch r.Method {
+			case "GET":
+				s.handleGetWallet(w, r)
+			case "POST":
+				s.handlePostWallet(w, r)
+			}
+		}
+	})
+
 	http.HandleFunc("/gobc/", func(rw http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/gobc/transactions") {
 			switch r.Method {
 			case "GET":
-				s.handleGet(rw, r)
+				s.handleGetTransaction(rw, r)
 			case "POST":
-				s.handlePost(rw, r)
+				s.handlePostTransaction(rw, r)
 			}
 		}
 	})
@@ -90,32 +103,80 @@ func (s *server) handleWsConn(c *client) {
 	}
 }
 
-func (s *server) handlePost(rw http.ResponseWriter, r *http.Request) {
-	sender := gobc.NewWallet()
-	receiver := gobc.NewWallet()
-	s.wallets = append(s.wallets, sender)
-	s.wallets = append(s.wallets, receiver)
-
+func (s *server) handlePostTransaction(rw http.ResponseWriter, r *http.Request) {
 	var txReq txRequest
 	bs, _ := io.ReadAll(r.Body)
 	json.Unmarshal(bs, &txReq)
-	tx := gobc.NewTransaction(&sender, &receiver, txReq.Amount)
+
+	var sender *gobc.Wallet
+	var recipient *gobc.Wallet
+	for _, w := range s.wallets {
+		if w.ID() == txReq.FromPrivKey {
+			sender = &w
+			break
+		}
+	}
+
+	for _, w := range s.wallets {
+		if w.GetPublicKey() == txReq.ToPublicKey {
+			recipient = &w
+			break
+		}
+	}
+
+	if sender == nil {
+		rw.WriteHeader(http.StatusBadRequest)
+		rw.Write([]byte("Sender wallet not found"))
+		return
+	}
+
+	if recipient == nil {
+		rw.WriteHeader(http.StatusBadRequest)
+		rw.Write([]byte("Recipient wallet not found"))
+		return
+	}
+
+	if sender.ID() == recipient.ID() {
+		rw.WriteHeader(http.StatusBadRequest)
+		rw.Write([]byte("You cannot send to yourself"))
+		return
+	}
+
+	tx := gobc.NewTransaction(sender, recipient, txReq.Amount)
+	tx.Sign(sender, &tx.Output)
 	s.txPool.Add(tx)
 
-	fmt.Println("TX POOL: ", s.txPool)
-
 	rw.WriteHeader(http.StatusCreated)
-	rw.Write([]byte("Transaction added to unverified transactions pool! Will be confirmed in next available block."))
-
+	rw.Write([]byte("Transaction added to unverified and incomplete transactions pool! Will be confirmed in next available block."))
 }
 
-func (s *server) handleGet(rw http.ResponseWriter, r *http.Request) {
+func (s *server) handleGetTransaction(rw http.ResponseWriter, r *http.Request) {
 	// for _, block := range s.blockchain.Blocks {
 	// 	for _, tx := range block.Transactions {
 	// 		fmt.Println(tx)
 	// 	}
 	// }
 	rw.Write([]byte("These are all the validated transactions!"))
+}
+
+func (s *server) handleGetWallet(w http.ResponseWriter, r *http.Request) {
+	walletPubKeys := make(map[int]string, 0)
+	i := 0
+	for _, w := range s.wallets {
+		walletPubKeys[i] = w.GetPublicKey()
+		i++
+	}
+	bs, _ := json.Marshal(walletPubKeys)
+	w.WriteHeader(http.StatusOK)
+	w.Write(bs)
+}
+
+func (s *server) handlePostWallet(w http.ResponseWriter, r *http.Request) {
+	wallet := gobc.NewWallet()
+	s.wallets = append(s.wallets, wallet)
+	wallet.ID()
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(fmt.Sprintf("Wallet is created \nPlease remember this secret id for making transactions \nSecret ID: %s", wallet.ID())))
 }
 
 func (s *server) broadcastMessage(msg, id string) {
