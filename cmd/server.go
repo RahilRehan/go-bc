@@ -13,11 +13,12 @@ import (
 )
 
 type server struct {
-	port       string
-	clients    []*client
-	txPool     *gobc.TransactionPool
-	wallets    []gobc.Wallet
-	blockchain gobc.Blockchain
+	port                  string
+	clients               []*client
+	txPool                *gobc.TransactionPool
+	wallets               []gobc.Wallet
+	blockchain            gobc.Blockchain
+	completedTransactions []gobc.Transaction
 }
 
 type txRequest struct {
@@ -67,7 +68,7 @@ func (s *server) start() {
 		if strings.HasPrefix(r.URL.Path, "/gobc/transactions") {
 			switch r.Method {
 			case "GET":
-				s.handleGetTransaction(rw, r)
+				// s.handleGetTransaction(rw, r)
 			case "POST":
 				s.handlePostTransaction(rw, r)
 			}
@@ -91,15 +92,23 @@ func (s *server) handleWsConn(c *client) {
 			s.broadcastMessage(serverLog, c.id)
 			break
 		}
-		serverLog := fmt.Sprint(string(msg))
+		// serverLog := fmt.Sprint(string(msg))
 
 		var bc gobc.Blockchain
 		err = json.Unmarshal(msg, &bc)
 		if err != nil {
 			log.Fatalln("Error un marshalling blockchain: ", err)
 		}
+
 		s.blockchain = bc
-		s.broadcastMessage(serverLog, c.id)
+		s.blockchain.Blocks[len(s.blockchain.Blocks)-1].Transactions = s.txPool.Transactions
+		s.txPool.Transactions = gobc.NewTransactionPool().Transactions
+		bs, err := json.Marshal(s.blockchain)
+		if err != nil {
+			log.Fatalln("Error marshalling blockchain: ", err)
+		}
+		fmt.Println(s.txPool.Transactions)
+		s.broadcastMessage(string(bs), "everyone")
 	}
 }
 
@@ -148,15 +157,6 @@ func (s *server) handlePostTransaction(rw http.ResponseWriter, r *http.Request) 
 
 	rw.WriteHeader(http.StatusCreated)
 	rw.Write([]byte("Transaction added to unverified and incomplete transactions pool! Will be confirmed in next available block."))
-}
-
-func (s *server) handleGetTransaction(rw http.ResponseWriter, r *http.Request) {
-	// for _, block := range s.blockchain.Blocks {
-	// 	for _, tx := range block.Transactions {
-	// 		fmt.Println(tx)
-	// 	}
-	// }
-	rw.Write([]byte("These are all the validated transactions!"))
 }
 
 func (s *server) handleGetWallet(w http.ResponseWriter, r *http.Request) {

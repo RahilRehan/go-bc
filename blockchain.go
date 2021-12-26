@@ -7,7 +7,7 @@ type Blockchain struct {
 }
 
 // Add a new block to the blockchain
-func (bc Blockchain) AddBlock(data string) Blockchain {
+func (bc Blockchain) AddBlock() Blockchain {
 	prevBlock := bc.Blocks[len(bc.Blocks)-1]
 	prevHash := prevBlock.Hash
 	newBlock := MineBlock(prevHash, 0, prevBlock.Timestamp)

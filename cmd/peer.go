@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -47,7 +48,7 @@ func (p *peer) connectToServer() {
 			log.Fatalln("couldn't send message: ", err.Error())
 		}
 
-		p.blockchain = p.blockchain.AddBlock("new data")
+		p.blockchain = p.blockchain.AddBlock()
 	}
 
 	// scanner := bufio.NewScanner(os.Stdin)
@@ -77,8 +78,10 @@ func (p *peer) handleNewMessage(conn *websocket.Conn) {
 			log.Fatalf("error while unmarshaling: %s\n", err.Error())
 		}
 
+		fmt.Println(receivedBlockchain)
+
 		// sync blockchain according to received blockchains length, longest blockchain wins
-		if len(receivedBlockchain.Blocks) > len(p.blockchain.Blocks) {
+		if len(receivedBlockchain.Blocks) >= len(p.blockchain.Blocks) {
 			p.blockchain = receivedBlockchain
 			log.Println("=========> Blockchain updated!!!")
 		}

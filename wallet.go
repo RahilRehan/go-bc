@@ -11,10 +11,10 @@ import (
 const INITIAL_BALANCE = 500
 
 type Wallet struct {
-	Balance        int64 `json:"balance"`
-	keyPair        *ecdsa.PrivateKey
-	PublicKeyECDSA ecdsa.PublicKey
-	PublicKey      string `json:"public_key"`
+	Balance        int64             `json:"balance"`
+	keyPair        *ecdsa.PrivateKey `json:"-"`
+	PublicKeyECDSA ecdsa.PublicKey   `json:"-"`
+	PublicKey      string            `json:"public_key"`
 }
 
 func NewWallet() Wallet {
