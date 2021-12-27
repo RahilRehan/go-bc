@@ -85,7 +85,7 @@ type Wallet struct {
 ### Mining
 The difficulty is `Dynamic Difficulty` which is calculated based on the `MINE_RATE`. If the time taken to mine a block is less than `MINE_RATE`, the difficulty of the next block will be higher, else vice versa. 
 
-## DEMO
+## DEMO and detailed instructions
 ### 1. Start the p2p server.
 - This server handles creation of new wallets.
 - This server also keeps track of all transactions in a transaction pool which are made by users with above wallets.

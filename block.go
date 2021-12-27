@@ -15,7 +15,7 @@ import (
 // But for un-marshaling Json we need to have exported fields :(
 
 const HASH_SIZE = 32
-const MINE_RATE = (time.Second)
+const MINE_RATE = (2 * time.Second)
 
 var DIFFICULTY = 4
 
