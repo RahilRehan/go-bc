@@ -4,6 +4,16 @@ A simple blockchain based crypto currency in go.
 
 Directly jump to the [DEMO](#Demo)
 
+## Aspects
+- [x] Block mining and hashing(SHA256)
+- [x] Proof of work with dynamic difficulty
+- [x] Distributed p2p blockchain  
+- [x] Blockchain update on longest length basis
+- [x] Wallets creation with public and private keys
+- [x] Transactions signing and verification
+- [x] Transaction pool for storing all transactions.
+- [ ] Rewards for miners
+
 ## Components
 ### Blocks
 Below is the struct to represent single block of a blockchain.
