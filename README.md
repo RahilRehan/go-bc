@@ -2,7 +2,7 @@
 
 A simple blockchain based crypto currency in go.
 
-Directly jump to the [DEMO](#Demo)
+Directly jump to the [DEMO](#Demo and detailed instructions)
 
 ## Aspects
 - [x] Block mining and hashing(SHA256)
